@@ -35,7 +35,8 @@ export class DishDetail extends Component {
                 return (
                     <div key={obj.id}>
                         <p>{obj.comment}</p>
-                        <p>-- {obj.author}, {obj.date}</p>
+                        <p>-- {obj.author}, {new Intl.DateTimeFormat('en-US', 
+                            { year: 'numeric', month: 'short', day: '2-digit'}).format(new Date(Date.parse(obj.date)))}</p>
                     </div>
                 );
             });
