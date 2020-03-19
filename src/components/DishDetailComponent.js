@@ -1,11 +1,13 @@
-import React from 'react';
-import { Card, CardImg, CardText, CardBody, CardTitle, BreadcrumbItem, Breadcrumb } from 'reactstrap';
+import React, { Component } from 'react';
+import { Card, CardImg, CardText, CardBody, CardTitle, BreadcrumbItem, Breadcrumb, 
+    Button, Modal, ModalHeader, ModalBody, Label, Row, Col } from 'reactstrap';
+import { Control, LocalForm, Errors } from 'react-redux-form';
 import { Link } from 'react-router-dom';
 
 function RenderDish({dish}) {
     if(dish != null) {
         return(
-            <div className="row">
+            <div className="col-12 col-md-5 m-1">
                 <Card>
                     <CardImg top src={dish.image} alt={dish.name} />
                     <CardBody>
@@ -33,7 +35,13 @@ function RenderComments({comments}) {
                 </div>
             );
         });
-        return comment;
+        return(
+            <div className="col-12 col-md-5 m-1">
+                <h4>Comments</h4>
+                {comment}
+                <CommentForm />
+            </div>
+        );
     } else {
         return(
             <div></div>
@@ -56,16 +64,105 @@ const DishDetail = (props) => {
                 </div>
             </div>
             <div className="row">
-                <div className="col-12 col-md-5 m-1">
-                    <RenderDish dish={props.dish} />
-                </div>
-                <div className="col-12 col-md-5 m-1">
-                    <h4>Comments</h4>
-                    <RenderComments comments={props.comments} />
-                </div>
+                <RenderDish dish={props.dish} />
+                <RenderComments comments={props.comments} />
             </div>
         </div>
     );
+}
+
+const maxLength = (len) => (val) => !(val) || (val.length <= len);
+const minLength = (len) => (val) => val && (val.length >= len);
+
+class CommentForm extends Component {
+    constructor(props) {
+        super(props);
+
+        this.toggleModal = this.toggleModal.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
+
+        this.state = {
+            isModalOpen: false
+        }
+    }
+
+    toggleModal() {
+        this.setState({
+            isModalOpen: !this.state.isModalOpen
+        });
+    }
+
+    handleSubmit(values) {
+        console.log('Current state is: '+ JSON.stringify(values));
+    }
+
+    render() {
+        return(
+            <div>
+                <Button outline onClick={this.toggleModal}><span className="fa fa-pencil fa-lg"></span> Submit Comment</Button>
+                <Modal isOpen={this.state.isModalOpen} toggle={this.toggleModal}>
+                    <ModalHeader toggle={this.toggleModal}>Submit</ModalHeader>
+                    <ModalBody>
+                        <LocalForm onSubmit={(values) => this.handleSubmit(values)}>
+                            <Row className="form-group">
+                                <Col>
+                                    <Label htmlFor="rating">Rating</Label>
+                                    <Control.select 
+                                        model=".rating" 
+                                        name="rating"
+                                        defaultValue="1"
+                                        className="form-control">
+                                        <option>1</option>
+                                        <option>2</option>
+                                        <option>3</option>
+                                        <option>4</option>
+                                        <option>5</option>
+                                    </Control.select>
+                                </Col>
+                            </Row>
+                            <Row className="form-group">
+                                <Col>
+                                    <Label htmlFor="author">Your Name</Label>
+                                    <Control.text 
+                                        model=".author" 
+                                        name="author"
+                                        className="form-control"
+                                        validators={{
+                                            minLength: minLength(3), maxLength: maxLength(15)                                        }}
+                                         />
+                                    <Errors
+                                        className="text-danger"
+                                        model=".author"
+                                        show="touched"
+                                        messages={{
+                                            minLength: 'Must be greater than 2 numbers; ',
+                                            maxLength: 'Must be 15 numbers or less;'
+                                        }}
+                                     />
+                                </Col>
+                            </Row>
+                            <Row className="form-group">
+                                <Col>
+                                    <Label htmlFor="comment">Your Feedback</Label>
+                                    <Control.textarea 
+                                        model=".comment" 
+                                        id="comment" 
+                                        name="comment"
+                                        rows="6"
+                                        className="form-control"></Control.textarea>
+                                </Col>
+                            </Row>
+                            <Row className="form-group">
+                                <Col>
+                                    <Button type="submit" color="primary">Submit</Button>
+                                </Col>
+                            </Row>
+                        </LocalForm>
+                    </ModalBody>
+                </Modal>
+            </div>
+        );
+    }
 }
 
 export default DishDetail;
