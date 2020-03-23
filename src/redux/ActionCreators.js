@@ -67,20 +67,28 @@ export const addComments = (comments) => ({
     payload: comments
 });
 
-export const addComment = (dishId, rating, author, comment) => ({
+export const addComment = (comment) => ({
     type: ActionTypes.ADD_COMMENT,
-    payload: {
+    payload: comment
+});
+
+export const postComment = (dishId, rating, author, comment) => (dispatch) => {
+    const newComment = {
         dishId,
         rating,
         author,
         comment
-    }
-});
+    };
+    newComment.date = new Date().toISOString();
 
-export const fetchPromos = () => (dispatch) => {
-    dispatch(promosLoading(true));
-
-    return fetch(baseUrl + 'promotions')
+    return fetch(baseUrl + 'comments',{
+        method: "POST",
+        body: JSON.stringify(newComment),
+        headers: {
+            "Content-Type": "application/json"
+        },
+        credentials: "same-origin"
+    })
         .then(response => {
             if (response.ok) {
                 return response;
@@ -90,6 +98,33 @@ export const fetchPromos = () => (dispatch) => {
                 throw error;
             }
         },
+        error => {
+            throw error;
+        }) 
+        .then(response => response.json())
+        .then(response => dispatch(addComment(response)))
+        .catch(error => { 
+            console.log('Post comments', error.message);
+            alert('Your comment could not be posted\nError: ' + error.message);
+        }); 
+}
+
+export const fetchPromos = () => (dispatch) => {
+    dispatch(promosLoading(true));
+
+    return fetch(baseUrl + 'promotions')
+        // if server is responding
+        .then(response => {
+            if (response.ok) {
+                return response;
+            } else {
+                // ...but isn't some expect answer
+                var error = new Error('Error ' + response.status + ': ' + response.statusText);
+                error.response = response;
+                throw error;
+            }
+        },
+        // if server is not responding
         error => {
             var errmess = new Error(error.message);
             throw errmess;
