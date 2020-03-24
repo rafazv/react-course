@@ -3,6 +3,7 @@ import { Card, CardImg, CardText, CardBody, CardTitle, BreadcrumbItem, Breadcrum
     Button, Modal, ModalHeader, ModalBody, Label, Row, Col } from 'reactstrap';
 import { Control, LocalForm, Errors } from 'react-redux-form';
 import { Link } from 'react-router-dom';
+import { FadeTransform, Fade, Stagger } from 'react-animation-components';
 
 import { baseUrl } from '../shared/baseUrl';
 import { Loading } from './LoadingComponent';
@@ -11,13 +12,17 @@ function RenderDish({dish}) {
     if(dish != null) {
         return(
             <div className="col-12 col-md-5 m-1">
-                <Card>
-                    <CardImg top src={baseUrl + dish.image} alt={dish.name} />
-                    <CardBody>
-                        <CardTitle>{dish.name}</CardTitle>
-                        <CardText>{dish.description}</CardText>
-                    </CardBody>
-                </Card>
+                <FadeTransform in transformProps={{
+                    exitTransform: 'scale(0.5) translateY(-50%)'
+                }}>
+                    <Card>
+                        <CardImg top src={baseUrl + dish.image} alt={dish.name} />
+                        <CardBody>
+                            <CardTitle>{dish.name}</CardTitle>
+                            <CardText>{dish.description}</CardText>
+                        </CardBody>
+                    </Card>
+                </FadeTransform>
             </div>
         );
     } else {
@@ -31,11 +36,15 @@ function RenderComments({comments, postComment, dishId}) {
     if(comments != null) {
         const comment = comments.map(obj => {
             return (
-                <div key={obj.id}>
-                    <p>{obj.comment}</p>
-                    <p>-- {obj.author}, {new Intl.DateTimeFormat('en-US', 
-                        { year: 'numeric', month: 'short', day: '2-digit'}).format(new Date(Date.parse(obj.date)))}</p>
-                </div>
+                <Stagger in>
+                    <Fade in>
+                        <div key={obj.id}>
+                            <p>{obj.comment}</p>
+                            <p>-- {obj.author}, {new Intl.DateTimeFormat('en-US', 
+                                { year: 'numeric', month: 'short', day: '2-digit'}).format(new Date(Date.parse(obj.date)))}</p>
+                        </div>
+                    </Fade>
+                </Stagger>
             );
         });
         return(
