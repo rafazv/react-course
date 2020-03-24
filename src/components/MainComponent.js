@@ -12,11 +12,13 @@ import DishDetail from './DishDetailComponent';
 import Header from './HeaderComponent';
 import Footer from './FooterComponent';
 
-import { fetchDishes, fetchComments, fetchPromos, postComment } from '../redux/ActionCreators';
+import { fetchDishes, fetchComments, fetchPromos, postComment, fetchLeaders, postFeedback } from '../redux/ActionCreators';
 
 const mapDispatchToProps = dispatch => ({
     postComment: (dishId, rating, author, comment) => dispatch(postComment(dishId, rating, author, comment)),
+    postFeedback: (firstname, lastname, telnum, email, agree, contactType, message) => dispatch(postFeedback(firstname, lastname, telnum, email, agree, contactType, message)),
     fetchDishes: () => { dispatch(fetchDishes()) },
+    fetchLeaders: () => { dispatch(fetchLeaders()) },
     fetchComments: () => { dispatch(fetchComments()) },
     fetchPromos: () => { dispatch(fetchPromos()) },
     resetFeedbackForm: () => { dispatch(actions.reset('feedback')) },
@@ -35,6 +37,7 @@ class Main extends Component {
 
     componentDidMount() {
         this.props.fetchDishes();
+        this.props.fetchLeaders();
         this.props.fetchComments();
         this.props.fetchPromos();
     }
@@ -46,10 +49,14 @@ class Main extends Component {
                     dish={this.props.dishes.dishes.filter((dish) => dish.featured)[0]}
                     dishesLoading={this.props.dishes.isLoading}
                     dishErrMess={this.props.dishes.errMess}
+
                     promotion={this.props.promotions.promotions.filter((promo) => promo.featured)[0]}
                     promoLoading={this.props.promotions.isLoading}
                     promoErrMess={this.props.promotions.errMess}
-                    leader={this.props.leaders.filter((leader) => leader.featured)[0]}
+
+                    leader={this.props.leaders.leaders.filter((leader) => leader.featured)[0]}
+                    leaderLoading={this.props.leaders.isLoading}
+                    leaderErrMess={this.props.leaders.errMess}
                 />
             );
         }
@@ -60,6 +67,7 @@ class Main extends Component {
                     dish={this.props.dishes.dishes.filter((dish) => dish.id === parseInt(match.params.dishId,10))[0]}
                     isLoading={this.props.dishes.isLoading}
                     errMess={this.props.dishes.errMess}
+
                     comments={this.props.comments.comments.filter((comment) => comment.dishId === parseInt(match.params.dishId,10))}
                     commentsErrMess={this.props.comments.errMess}
                     postComment={this.props.postComment}
@@ -67,6 +75,25 @@ class Main extends Component {
             );
         };
 
+        const AboutUsPage = () => {
+            return (
+                <About 
+                    leaders={this.props.leaders}
+                    isLoading={this.props.leaders.isLoading}
+                    errMess={this.props.leaders.errMess}
+                />
+            );
+        }
+
+        const ContactPage = () => {
+            return (
+                <Contact 
+                    resetFeedbackForm={this.props.resetFeedbackForm}
+                    postFeedback={this.props.postFeedback}
+                />
+            );
+        }
+        
         return (
             <div>
                 <Header />
@@ -76,8 +103,8 @@ class Main extends Component {
                             <Route path="/home" component={HomePage} />
                             <Route path="/menu/:dishId" component={DishWithId} />
                             <Route exact path="/menu" component={() => <Menu dishes={this.props.dishes} />} />
-                            <Route exact path="/contactus" component={() => <Contact resetFeedbackForm={this.props.resetFeedbackForm} />} />
-                            <Route exact path="/aboutus" component={() => <About leaders={this.props.leaders} />} />
+                            <Route exact path="/contactus" component={ContactPage} />
+                            <Route exact path="/aboutus" component={AboutUsPage} />
                             <Redirect to="/home" />
                         </Switch>
                     </CSSTransition>
